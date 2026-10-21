@@ -32,6 +32,14 @@ Item {
         (content.item as Bar)?.checkPopout(y);
     }
 
+    function updateHover(y: real): void {
+        (content.item as Bar)?.updateHover(y);
+    }
+
+    function clearStatusIconHover(): void {
+        (content.item as Bar)?.clearStatusIconHover();
+    }
+
     function handleWheel(y: real, angleDelta: point): void {
         (content.item as Bar)?.handleWheel(y, angleDelta);
     }

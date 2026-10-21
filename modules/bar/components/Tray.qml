@@ -10,6 +10,24 @@ import qs.services
 StyledRect {
     id: root
 
+    required property var popouts
+    required property var bar
+
+    function openMenu(trayItem: var): void {
+        const values = SystemTray.items.values.filter(i => i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id));
+        const index = values.findIndex(i => i.id === trayItem.id);
+        if (index < 0)
+            return;
+
+        const item = items.itemAt(index);
+        if (!item)
+            return;
+
+        popouts.currentName = `traymenu${index}`;
+        popouts.currentCenter = Qt.binding(() => item.mapToItem(root.bar, 0, item.implicitHeight / 2).y);
+        popouts.hasCurrent = true;
+    }
+
     readonly property alias layout: layout
     readonly property alias items: items
     readonly property alias expandIcon: expandIcon
@@ -74,7 +92,9 @@ StyledRect {
                 values: SystemTray.items.values.filter(i => i.status !== Status.Passive && !GlobalConfig.bar.tray.hiddenIcons.includes(i.id))
             }
 
-            TrayItem {}
+            TrayItem {
+                onMenuRequested: trayItem => root.openMenu(trayItem)
+            }
         }
 
         Behavior on opacity {

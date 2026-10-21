@@ -42,36 +42,59 @@ ColumnLayout {
         }
 
         const id = ch.entryId;
-        const top = ch.y;
 
         if (id === "statusIcons" && Config.bar.popouts.statusIcons) {
             const items = (ch.item as StatusIcons).items;
             const icon = items.childAt(items.width / 2, mapToItem(items, 0, y).y);
             if (icon) {
-                popouts.currentName = icon.name;
-                popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, 0, icon.implicitHeight / 2).y);
-                popouts.hasCurrent = true;
-            }
-        } else if (id === "tray" && Config.bar.popouts.tray) {
-            const tray = ch.item as Tray;
-            if (!Config.bar.tray.compact || (tray.expanded && !tray.expandIcon.contains(mapToItem(tray.expandIcon, tray.implicitWidth / 2, y)))) {
-                const index = Math.floor(((y - top - tray.padding * 2 + tray.spacing) / tray.layout.implicitHeight) * tray.items.count);
-                const trayItem = tray.items.itemAt(index);
-                if (trayItem) {
-                    popouts.currentName = `traymenu${index}`;
-                    popouts.currentCenter = Qt.binding(() => trayItem.mapToItem(root, 0, trayItem.implicitHeight / 2).y);
-                    popouts.hasCurrent = true;
-                } else {
+                if (popouts.hasCurrent && popouts.currentName === icon.name) {
                     popouts.hasCurrent = false;
+                } else {
+                    popouts.currentName = icon.name;
+                    popouts.currentCenter = Qt.binding(() => icon.mapToItem(root, 0, icon.implicitHeight / 2).y);
+                    popouts.hasCurrent = true;
                 }
             } else {
                 popouts.hasCurrent = false;
-                tray.expanded = true;
+            }
+        } else if (id === "tray" && Config.bar.popouts.tray) {
+            const tray = ch.item as Tray;
+            if (Config.bar.tray.compact) {
+                tray.expanded = !tray.expanded;
+                if (!tray.expanded)
+                    popouts.hasCurrent = false;
+            } else {
+                popouts.hasCurrent = false;
             }
         } else if (id === "activeWindow" && Config.bar.popouts.activeWindow && Config.bar.activeWindow.showOnHover) {
-            popouts.currentName = id.toLowerCase();
-            popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
-            popouts.hasCurrent = true;
+            if (!Hypr.activeToplevel || (popouts.hasCurrent && popouts.currentName === "activewindow")) {
+                popouts.hasCurrent = false;
+            } else {
+                popouts.currentName = "activewindow";
+                popouts.currentCenter = (ch.item as Item).mapToItem(root, 0, (ch.item as Item).implicitHeight / 2).y ?? 0;
+                popouts.hasCurrent = true;
+            }
+        } else {
+            popouts.hasCurrent = false;
+        }
+    }
+
+    function updateHover(y: real): void {
+        const ch = childAt(width / 2, y) as EntryWrapper;
+        if (ch?.entryId === "statusIcons") {
+            const status = ch.item as StatusIcons;
+            const column = status.items;
+            status.hoveredEntry = column.childAt(column.width / 2, mapToItem(column, 0, y).y);
+        } else {
+            clearStatusIconHover();
+        }
+    }
+
+    function clearStatusIconHover(): void {
+        for (let i = 0; i < repeater.count; i++) {
+            const entry = repeater.itemAt(i) as EntryWrapper;
+            if (entry?.entryId === "statusIcons")
+                (entry.item as StatusIcons).hoveredEntry = null;
         }
     }
 
@@ -152,6 +175,8 @@ ColumnLayout {
                 delegate: EntryWrapper {
                     Tray {
                         objectName: "taskbarTray"
+                        popouts: root.popouts
+                        bar: root
                     }
                 }
             }

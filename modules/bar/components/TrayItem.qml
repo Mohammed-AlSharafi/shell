@@ -12,6 +12,8 @@ MouseArea {
 
     required property SystemTrayItem modelData
 
+    signal menuRequested(var trayItem)
+
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     implicitWidth: Tokens.font.body.small.pointSize * 2
     implicitHeight: Tokens.font.body.small.pointSize * 2
@@ -19,8 +21,24 @@ MouseArea {
     onClicked: event => {
         if (event.button === Qt.LeftButton)
             modelData.activate();
+        else if (modelData.hasMenu)
+            root.menuRequested(root.modelData);
         else
             modelData.secondaryActivate();
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        radius: width / 2
+        color: Colours.palette.m3onSurface
+        opacity: root.containsMouse ? 0.15 : 0
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 150
+                easing.type: Easing.OutCubic
+            }
+        }
     }
 
     ColouredIcon {

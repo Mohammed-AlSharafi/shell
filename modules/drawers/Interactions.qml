@@ -64,6 +64,22 @@ CustomMouseArea {
     hoverEnabled: true
 
     onPressed: event => dragStart = Qt.point(event.x, event.y)
+
+    onClicked: event => {
+        const dx = event.x - dragStart.x;
+        const dy = event.y - dragStart.y;
+        if (fullscreen || dx * dx + dy * dy > 25)
+            return;
+
+        // Bar items open their popouts on click instead of hover
+        if (event.button === Qt.LeftButton && event.x < bar.implicitWidth) {
+            bar.checkPopout(event.y);
+        } else if (!inLeftPanel(panels.popoutsWrapper, event.x, event.y)) {
+            popouts.hasCurrent = false;
+            bar.closeTray();
+        }
+    }
+
     onContainsMouseChanged: {
         if (!containsMouse) {
             // Only hide if not activated by shortcut
@@ -78,16 +94,13 @@ CustomMouseArea {
             if (!utilitiesShortcutActive)
                 screenState.utilities = false;
 
-            if (!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) {
-                popouts.hasCurrent = false;
-                bar.closeTray();
-            }
-
             if (Config.bar.showOnHover)
                 bar.isHovered = false;
 
             if (Config.sidebar.showOnHover)
                 screenState.sidebar = false;
+
+            bar.clearStatusIconHover();
         }
     }
 
@@ -99,6 +112,11 @@ CustomMouseArea {
         const y = event.y;
         const dragX = x - dragStart.x;
         const dragY = y - dragStart.y;
+
+        if (fullscreen || x >= bar.implicitWidth)
+            bar.clearStatusIconHover();
+        else
+            bar.updateHover(y);
 
         if (fullscreen) {
             root.panels.osd.hovered = inRightPanel(panels.osdWrapper, x, y);
@@ -237,13 +255,7 @@ CustomMouseArea {
             utilitiesShortcutActive = false;
         }
 
-        // Show popouts on hover
-        if (x < bar.implicitWidth) {
-            bar.checkPopout(y);
-        } else if ((!popouts.currentName.startsWith("traymenu") || ((popouts.current as StackView)?.depth ?? 0) <= 1) && !inLeftPanel(panels.popoutsWrapper, x, y)) {
-            popouts.hasCurrent = false;
-            bar.closeTray();
-        }
+        // Popouts stay open while the pointer moves away; close them by clicking the item again or clicking elsewhere
     }
 
     // Monitor individual visibility changes

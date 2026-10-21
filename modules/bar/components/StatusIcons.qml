@@ -47,6 +47,28 @@ StyledRect {
     implicitWidth: Tokens.sizes.bar.innerWidth
     implicitHeight: iconColumn.implicitHeight + Tokens.padding.medium * 2
 
+    property Item hoveredEntry
+
+    Rectangle {
+        id: hoverCircle
+
+        readonly property Item target: root.hoveredEntry
+
+        width: target ? Math.min(target.width, target.height) + 8 : 0
+        height: width
+        radius: width / 2
+        x: target ? iconColumn.x + target.x + (target.width - width) / 2 : 0
+        y: target ? iconColumn.y + target.y + (target.height - height) / 2 : 0
+        color: Colours.palette.m3onSurface
+        opacity: target ? 0.15 : 0
+
+        Behavior on opacity {
+            Anim {
+                type: Anim.DefaultEffects
+            }
+        }
+    }
+
     ColumnLayout {
         id: iconColumn
 

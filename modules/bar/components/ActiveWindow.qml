@@ -14,6 +14,8 @@ Item {
     required property Brightness.Monitor monitor
     property color colour: Colours.palette.m3primary
 
+    readonly property bool hasWindow: !!Hypr.activeToplevel
+
     readonly property string windowTitle: {
         const title = Hypr.activeToplevel?.title;
         if (!title)
@@ -45,7 +47,8 @@ Item {
         active: !Config.bar.activeWindow.showOnHover
 
         sourceComponent: MouseArea {
-            cursorShape: Qt.PointingHandCursor
+            enabled: root.hasWindow
+            cursorShape: root.hasWindow ? Qt.PointingHandCursor : undefined
             hoverEnabled: true
             onPositionChanged: {
                 const popouts = root.bar.popouts;
@@ -53,6 +56,9 @@ Item {
                     popouts.hasCurrent = false;
             }
             onClicked: {
+                if (!root.hasWindow)
+                    return;
+
                 const popouts = root.bar.popouts;
                 if (popouts.hasCurrent) {
                     popouts.hasCurrent = false;
@@ -62,6 +68,19 @@ Item {
                     popouts.hasCurrent = true;
                 }
             }
+        }
+    }
+
+    Connections {
+        target: Hypr
+
+        function onActiveToplevelChanged() {
+            if (root.hasWindow)
+                return;
+
+            const popouts = root.bar.popouts;
+            if (popouts.currentName === "activewindow")
+                popouts.hasCurrent = false;
         }
     }
 
