@@ -215,7 +215,9 @@ Singleton {
             else if (isDdc)
                 Quickshell.execDetached(["ddcutil", "-b", busNum, "setvcp", "10", rounded]);
             else
-                Quickshell.execDetached(["brightnessctl", "s", `${rounded}%`]);
+                // Local patch: this laptop exposes a bogus nvidia_0 backlight, which bare
+                // `brightnessctl` picks by default. Target the real eDP-1 panel explicitly.
+                Quickshell.execDetached(["brightnessctl", "-d", "amdgpu_bl1", "s", `${rounded}%`]);
 
             if (isDdc)
                 timer.restart();
@@ -227,7 +229,7 @@ Singleton {
             else if (isDdc)
                 initProc.command = ["ddcutil", "-b", busNum, "getvcp", "10", "--brief"];
             else
-                initProc.command = ["sh", "-c", "echo a b c $(brightnessctl g) $(brightnessctl m)"];
+                initProc.command = ["sh", "-c", "echo a b c $(brightnessctl -d amdgpu_bl1 g) $(brightnessctl -d amdgpu_bl1 m)"];
 
             initProc.running = true;
         }

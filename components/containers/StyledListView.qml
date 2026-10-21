@@ -7,6 +7,7 @@ ListView {
     property bool doneFakeFlick
 
     maximumFlickVelocity: 3000
+    boundsBehavior: Flickable.StopAtBounds
 
     rebound: Transition {
         onRunningChanged: {

@@ -13,8 +13,9 @@ VerticalFadeFlickable {
 
     required property NexusState nState
 
-    topMargin: Tokens.padding.large
-    bottomMargin: Tokens.padding.large
+    topMargin: Tokens.padding.extraLarge
+    bottomMargin: Tokens.padding.extraLarge
+    fadeAmount: 0.1
     contentHeight: content.implicitHeight
 
     TapHandler {

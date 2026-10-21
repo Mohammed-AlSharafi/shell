@@ -20,7 +20,7 @@ ColumnLayout {
 
     default property Item contentChild
 
-    spacing: Tokens.spacing.extraLargeIncreased
+    spacing: Tokens.spacing.extraExtraLarge
 
     MouseArea { // Prevent clicks from reaching flickable
         z: 1
@@ -66,7 +66,8 @@ ColumnLayout {
 
         Layout.topMargin: -topMargin
         topMargin: Tokens.padding.large
-        bottomMargin: Tokens.padding.extraLarge
+        bottomMargin: Tokens.padding.extraExtraLarge
+        fadeAmount: 0.1
 
         contentHeight: root.contentChild?.implicitHeight ?? 0
         contentItem.children: [root.contentChild]
