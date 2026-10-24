@@ -16,7 +16,10 @@ Item {
     required property ShellScreen screen
     required property HyprlandToplevel client
 
+    property real maxWidth: Infinity
+
     Layout.preferredWidth: preview.implicitWidth + Tokens.padding.extraLargeIncreased
+    Layout.fillWidth: true
     Layout.fillHeight: true
 
     ClipRect {
@@ -72,7 +75,7 @@ Item {
             captureSource: root.client?.wayland ?? null
             live: true
 
-            constraintSize.width: root.client ? parent.height * Math.min(root.screen.width / root.screen.height, root.client?.lastIpcObject.size[0] / root.client?.lastIpcObject.size[1]) : parent.height
+            constraintSize.width: Math.min(root.client ? parent.height * Math.min(root.screen.width / root.screen.height, root.client?.lastIpcObject.size[0] / root.client?.lastIpcObject.size[1]) : parent.height, root.maxWidth)
             constraintSize.height: parent.height
         }
     }
@@ -83,6 +86,10 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
         anchors.bottomMargin: Tokens.padding.large
+
+        width: parent.width
+        horizontalAlignment: Text.AlignHCenter
+        elide: Text.ElideRight
 
         animate: true
         text: {

@@ -12,12 +12,15 @@ Item {
     required property real borderThickness
 
     readonly property alias content: content
-    property real offsetScale: x > 0 || content.hasCurrent ? 0 : 1
+    // Keep the clip open while a popout is attached or detached. Deriving this from
+    // x caused a feedback loop: the x animation overshoots 0, flipping offsetScale
+    // back to 0 and re-expanding the panel mid-close.
+    property real offsetScale: content.isDetached || content.hasCurrent ? 0 : 1
 
     visible: width > 0 && height > 0
     clip: true
 
-    implicitWidth: content.implicitWidth * (1 - offsetScale)
+    implicitWidth: Math.max(0, content.implicitWidth * (1 - offsetScale))
     implicitHeight: content.implicitHeight
 
     x: content.isDetached ? (parent.width - content.nonAnimWidth) / 2 : 0
