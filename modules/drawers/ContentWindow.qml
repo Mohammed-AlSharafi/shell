@@ -131,7 +131,11 @@ StyledWindow {
             root.screenState.session = false;
             root.screenState.sidebar = false;
             root.screenState.dashboard = false;
-            panels.popouts.hasCurrent = false;
+            // A detached popout (e.g. window info) owns its own focus grab. Activating
+            // that grab clears this one, so don't cancel the popout in that case or the
+            // detached view collapses before it can be shown.
+            if (!panels.popouts.isDetached)
+                panels.popouts.hasCurrent = false;
             bar.closeTray();
         }
     }
